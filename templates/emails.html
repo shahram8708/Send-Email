@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sent Emails</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #343a40;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            min-width: 150px;
+        }
+
+        th {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        td {
+            background-color: #f8f9fa;
+        }
+
+        table::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        table::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 6px;
+        }
+
+        table::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        table::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            display: block;
+            overflow-x: auto;
+        }
+
+        .table-container th,
+        .table-container td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            min-width: 150px;
+        }
+
+        .table-container th {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .table-container td {
+            background-color: #f8f9fa;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 6px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Sent Emails</h2>
+        <a href="/" class="back-button">Back to Email Sender</a>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Subject</th>
+                        <th class="body">Body</th>
+                        <th>Timestamp</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="emailList"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const emails = JSON.parse(localStorage.getItem('sentEmails')) || [];
+            const emailList = document.getElementById('emailList');
+
+            emails.forEach(function (email, index) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${email.from}</td>
+                <td>${email.to}</td>
+                <td>${email.subject}</td>
+                <td class="body">${email.body}</td>
+                <td>${email.timestamp}</td>
+                <td><button class="delete-button" onclick="deleteEmail(${index})">Delete</button></td>
+            `;
+                emailList.appendChild(row);
+            });
+        });
+
+        function deleteEmail(index) {
+            let emails = JSON.parse(localStorage.getItem('sentEmails')) || [];
+
+            emails.splice(index, 1);
+
+            localStorage.setItem('sentEmails', JSON.stringify(emails));
+
+            const emailList = document.getElementById('emailList');
+            emailList.innerHTML = '';
+
+            emails.forEach(function (email, index) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${email.from}</td>
+                <td>${email.to}</td>
+                <td>${email.subject}</td>
+                <td class="body">${email.body}</td>
+                <td>${email.timestamp}</td>
+                <td><button class="delete-button" onclick="deleteEmail(${index})">Delete</button></td>
+            `;
+                emailList.appendChild(row);
+            });
+        }
+    </script>
+</body>
+
+</html>
