@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sender</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 1000px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #343a40;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        input,
+        textarea {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #495057;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .secondary-button {
+            background-color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .secondary-button:hover {
+            background-color: #5a6268;
+        }
+
+        .toggle-password {
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-password:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Send Email</h2>
+        <form id="emailForm">
+            <label for="smtp_server">SMTP Server:</label>
+            <input type="text" id="smtp_server" name="smtp_server" value="smtp.gmail.com" required readonly>
+
+            <label for="smtp_port">SMTP Port:</label>
+            <input type="number" id="smtp_port" name="smtp_port" value="587" required readonly>
+
+            <label for="smtp_username">Your Email:</label>
+            <input type="email" id="smtp_username" name="smtp_username" placeholder="Your email address" required>
+
+            <label for="smtp_password">Email Password:</label>
+            <input type="password" id="smtp_password" name="smtp_password" placeholder="Your email password" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">&#x1F441;</button>
+
+            <label for="from">From Email:</label>
+            <input type="email" id="from" name="from" placeholder="Your email address" required>
+
+            <label for="to">To Email:</label>
+            <input type="email" id="to" name="to" placeholder="Recipient's email address" required>
+
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" placeholder="Subject of the email" required>
+
+            <label for="body">Message:</label>
+            <textarea id="body" name="body" placeholder="Your message" rows="6" required></textarea>
+
+            <button type="submit" id="sendButton">Send Email</button>
+            <button type="button" class="secondary-button" onclick="viewSentEmails()">View Emails</button>
+        </form>
+        <p id="result"></p>
+    </div>
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            document.getElementById('sendButton').disabled = true;
+
+            const smtp_server = document.getElementById('smtp_server').value;
+            const smtp_port = document.getElementById('smtp_port').value;
+            const smtp_username = document.getElementById('smtp_username').value;
+            const smtp_password = document.getElementById('smtp_password').value;
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+            const subject = document.getElementById('subject').value;
+            const body = document.getElementById('body').value;
+
+            try {
+                const response = await fetch('/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ smtp_server, smtp_port, smtp_username, smtp_password, from, to, subject, body })
+                });
+
+                const result = await response.json();
+                document.getElementById('result').textContent = result.message;
+
+                const emailData = {
+                    smtp_server,
+                    smtp_port,
+                    smtp_username,
+                    from,
+                    to,
+                    subject,
+                    body,
+                    timestamp: new Date().toLocaleString()
+                };
+                saveEmailData(emailData);
+
+                document.getElementById('emailForm').reset();
+            } catch (error) {
+                console.error('Error sending email:', error);
+                document.getElementById('result').textContent = 'Failed to send email. Please try again later.';
+            } finally {
+                document.getElementById('sendButton').disabled = false;
+            }
+        });
+
+        function saveEmailData(emailData) {
+            let emails = JSON.parse(localStorage.getItem('sentEmails')) || [];
+            emails.push(emailData);
+            localStorage.setItem('sentEmails', JSON.stringify(emails));
+        }
+
+        function viewSentEmails() {
+            window.location.href = 'emails';
+        }
+
+
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('smtp_password');
+            const toggleButton = document.querySelector('.toggle-password');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleButton.innerHTML = '&#x1F648;';
+            } else {
+                passwordField.type = 'password';
+                toggleButton.innerHTML = '&#x1F441;'; 
+            }
+
+        }
+    </script>
+</body>
+
+</html>
